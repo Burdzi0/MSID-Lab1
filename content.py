@@ -5,6 +5,7 @@
 #  autorzy: A. Gonczarek, J. Kaczmar, S. Zareba
 #  2017
 # --------------------------------------------------------------------------
+import sys
 
 import numpy as np
 from utils import polynomial
@@ -57,7 +58,7 @@ def least_squares(x_train, y_train, M):
     w = w @ design_m.transpose() @ y_train
 
     err = mean_squared_error(x_train, y_train, w)
-    return (w, err)
+    return w, err
 
 
 def regularized_least_squares(x_train, y_train, M, regularization_lambda):
@@ -76,7 +77,8 @@ def regularized_least_squares(x_train, y_train, M, regularization_lambda):
     w = np.linalg.inv(w) @ design_m.transpose() @ y_train
 
     err = mean_squared_error(x_train, y_train, w)
-    return (w, err)
+    return w, err
+
 
 def model_selection(x_train, y_train, x_val, y_val, M_values):
     '''
@@ -89,7 +91,21 @@ def model_selection(x_train, y_train, x_val, y_val, M_values):
     tj. daje najmniejszy blad na ciagu walidacyjnym, train_err i val_err to bledy na sredniokwadratowe na ciagach treningowym
     i walidacyjnym
     '''
-    pass
+
+    val_err = sys.maxsize
+    overall_w = 0
+    train_err = 0
+
+    for M in M_values:
+        (w, err) = least_squares(x_train, y_train, M)
+        mean_sqr_error = mean_squared_error(x_val, y_val, w)
+
+        if mean_sqr_error < val_err:
+            val_err = mean_sqr_error
+            overall_w = w
+            train_err = err
+
+    return overall_w, train_err, val_err
 
 
 def regularized_model_selection(x_train, y_train, x_val, y_val, M, lambda_values):
@@ -104,4 +120,15 @@ def regularized_model_selection(x_train, y_train, x_val, y_val, M, lambda_values
     tj. daje najmniejszy blad na ciagu walidacyjnym. Wielomian dopasowany jest wg kryterium z regularyzacja. train_err i val_err to
     bledy na sredniokwadratowe na ciagach treningowym i walidacyjnym. regularization_lambda to najlepsza wartosc parametru regularyzacji
     '''
-    pass
+
+    val_err = sys.maxsize
+    result = (0, 0, sys.maxsize, 0)
+
+    for lambd in lambda_values:
+        (w, err) = regularized_least_squares(x_train, y_train, M, lambd)
+        mean_sqr_error = mean_squared_error(x_val, y_val, w)
+
+        if mean_sqr_error < result[2]:
+            result = (w, err, mean_sqr_error, lambd)
+
+    return result
