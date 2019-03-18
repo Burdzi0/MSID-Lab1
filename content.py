@@ -20,8 +20,8 @@ def mean_squared_error(x, y, w):
     '''
 
     poly = polynomial(x, w)
-    res = (poly - y)**2
-    return np.array(res.sum() / res.size)
+    res = (y - poly)**2
+    return np.mean(res)
 
 
 def design_matrix(x_train, M):
@@ -30,7 +30,15 @@ def design_matrix(x_train, M):
     :param M: stopien wielomianu 0,1,2,...
     :return: funkcja wylicza Design Matrix Nx(M+1) dla wielomianu rzedu M
     '''
-    pass
+
+    w = len(x_train)
+    matrix = np.zeros(shape=(w, M+1))
+    for y in range(w):
+        for x in range(M + 1):
+            matrix[y][x] = x_train[y][0]**x
+
+    print(matrix)
+    return matrix
 
 
 def least_squares(x_train, y_train, M):
