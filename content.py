@@ -69,8 +69,14 @@ def regularized_least_squares(x_train, y_train, M, regularization_lambda):
     :return: funkcja zwraca krotke (w,err), gdzie w sa parametrami dopasowanego wielomianu zgodnie z kryterium z regularyzacja l2,
     a err blad sredniokwadratowy dopasowania
     '''
-    pass
 
+    design_m = design_matrix(x_train, M)
+    w = design_m.transpose() @ design_m
+    w = w + regularization_lambda * np.eye(len(w))
+    w = np.linalg.inv(w) @ design_m.transpose() @ y_train
+
+    err = mean_squared_error(x_train, y_train, w)
+    return (w, err)
 
 def model_selection(x_train, y_train, x_val, y_val, M_values):
     '''
